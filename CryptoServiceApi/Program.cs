@@ -45,6 +45,34 @@ app.MapGet("/v1/cryptos", async () =>
 .WithName("GetAllCryptosInfo")
 .WithOpenApi();
 
+app.MapGet("/v1/crypto/{id}", async (int id) =>
+{
+    using (var httpClient = new HttpClient())
+    {
+        var apiUrl = $"http://localhost:3000/v1/asset/byId?id={id}";
+        var response = await httpClient.GetAsync(apiUrl);
+
+        if (response.IsSuccessStatusCode)
+        {
+            var jsonString = await response.Content.ReadAsStringAsync();
+            var crypto = JsonSerializer.Deserialize<CryptoAsset>(jsonString);
+
+            if (crypto.type != "crypto")
+              {
+                  return Results.BadRequest("The input id is not a crypto.");
+              }
+
+            return Results.Json(crypto);
+        }
+        else
+        {
+            return Results.BadRequest("Failed to retrieve the crypto.");
+        }
+    }
+})
+.WithName("GetCryptoInfoById")
+.WithOpenApi();
+
 
 app.Run();
 
