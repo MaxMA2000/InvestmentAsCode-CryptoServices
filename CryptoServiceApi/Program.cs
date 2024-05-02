@@ -1,9 +1,13 @@
+using System.Text.Json;
+
 var builder = WebApplication.CreateBuilder(args);
+
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
 
 var app = builder.Build();
 
@@ -16,29 +20,44 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
 
-app.MapGet("/weatherforecast", () =>
+app.MapGet("/v1/cryptos", async () =>
 {
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
+    using (var httpClient = new HttpClient())
+    {
+        var response = await httpClient.GetAsync("http://localhost:3000/v1/asset/byType?type=crypto");
+
+        if (response.IsSuccessStatusCode)
+        {
+
+            var jsonString = await response.Content.ReadAsStringAsync();
+            var jsonArray = JsonSerializer.Deserialize<List<CryptoAsset>>(jsonString);
+
+            return Results.Json(jsonArray);
+
+        }
+        else
+        {
+            return Results.BadRequest("Failed to retrieve the crypto list.");
+        }
+    }
 })
-.WithName("GetWeatherForecast")
+.WithName("GetAllCryptosInfo")
 .WithOpenApi();
+
 
 app.Run();
 
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
+
+
+public class CryptoAsset
 {
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+    public int assetId { get; set; }
+    public string symbol { get; set; }
+    public string name { get; set; }
+    public string exchange { get; set; }
+    public string exchangeShortName { get; set; }
+    public string type { get; set; }
+    public DateTime asOfDate { get; set; }
 }
+
