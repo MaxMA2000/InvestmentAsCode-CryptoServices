@@ -108,6 +108,34 @@ app.MapGet("/v1/crypto/{id}/{date}", async (int id, string date) =>
 
 
 
+
+app.MapGet("/v1/crypto/{id}/from/{from}/to/{to}", async (int id, string from, string to) =>
+{
+    using (var httpClient = new HttpClient())
+    {
+        var apiUrl = $"http://localhost:8080/data/v1/crypto/byAssetIdAndDateRange?asset_id={id}&from={from}&to={to}";
+        // var apiUrl = $"http://localhost:3000/data/v1/crypto/byAssetIdAndDateRange?asset_id=4&from=2024-01-01&to=2024-01-10";
+        var response = await httpClient.GetAsync(apiUrl);
+        Console.WriteLine($"response: {response}");
+        if (response.IsSuccessStatusCode)
+        {
+            var jsonString = await response.Content.ReadAsStringAsync();
+
+            var jsonArray = JsonSerializer.Deserialize<List<CryptoPrice>>(jsonString);
+
+            return Results.Json(jsonArray);
+        }
+        else
+        {
+            return Results.BadRequest("Failed to retrieve crypto data.");
+        }
+    }
+})
+.WithName("GetPeriodCryptoPrice")
+.WithOpenApi();
+
+
+
 app.Run();
 
 
