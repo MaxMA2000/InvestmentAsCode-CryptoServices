@@ -6,6 +6,8 @@ using System.Text.Json;
 public static class CryptoInfoController
 {
 
+  private const string AssetServiceUrl = "http://localhost:3000";
+
   public static WebApplication MapCryptoInfoController(this WebApplication app)
   {
 
@@ -13,7 +15,7 @@ public static class CryptoInfoController
       {
           using (var httpClient = new HttpClient())
           {
-              var response = await httpClient.GetAsync("http://localhost:3000/v1/asset/byType?type=crypto");
+              var response = await httpClient.GetAsync($"{AssetServiceUrl}/v1/asset/byType?type=crypto");
 
               if (response.IsSuccessStatusCode)
               {
@@ -37,7 +39,7 @@ public static class CryptoInfoController
       {
           using (var httpClient = new HttpClient())
           {
-              var apiUrl = $"http://localhost:3000/v1/asset/byId?id={id}";
+              var apiUrl = $"{AssetServiceUrl}/v1/asset/byId?id={id}";
               var response = await httpClient.GetAsync(apiUrl);
 
               if (response.IsSuccessStatusCode)

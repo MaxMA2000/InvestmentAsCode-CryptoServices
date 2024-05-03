@@ -5,7 +5,7 @@ using System.Text.Json;
 
 public static class CryptoPriceController
 {
-
+  private const string DALUrl = "http://localhost:8080";
   public static WebApplication MapCryptoPriceController(this WebApplication app)
   {
 
@@ -14,7 +14,7 @@ public static class CryptoPriceController
       {
           using (var httpClient = new HttpClient())
           {
-              var apiUrl = $"http://localhost:8080/data/v1/crypto/byAssetIdAndDateRange?asset_id={id}&from={date}&to={date}";
+              var apiUrl = $"{DALUrl}/data/v1/crypto/byAssetIdAndDateRange?asset_id={id}&from={date}&to={date}";
               var response = await httpClient.GetAsync(apiUrl);
 
               if (response.IsSuccessStatusCode)
@@ -45,10 +45,10 @@ public static class CryptoPriceController
       {
           using (var httpClient = new HttpClient())
           {
-              var apiUrl = $"http://localhost:8080/data/v1/crypto/byAssetIdAndDateRange?asset_id={id}&from={from}&to={to}";
-              // var apiUrl = $"http://localhost:3000/data/v1/crypto/byAssetIdAndDateRange?asset_id=4&from=2024-01-01&to=2024-01-10";
+              var apiUrl = $"{DALUrl}/data/v1/crypto/byAssetIdAndDateRange?asset_id={id}&from={from}&to={to}";
+
               var response = await httpClient.GetAsync(apiUrl);
-              Console.WriteLine($"response: {response}");
+
               if (response.IsSuccessStatusCode)
               {
                   var jsonString = await response.Content.ReadAsStringAsync();
