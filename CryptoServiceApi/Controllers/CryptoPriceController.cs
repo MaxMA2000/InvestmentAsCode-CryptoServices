@@ -1,64 +1,13 @@
-namespace CryptoServiceApi.Startup;
+namespace CryptoServiceApi.Controllers;
+
 
 using System.Text.Json;
 
-public static class MapEndpoints
+public static class CryptoPriceController
 {
-    public static WebApplication MapUserEndpoints(this WebApplication app)
-    {
 
-      app.MapGet("/v1/cryptos", async () =>
-      {
-          using (var httpClient = new HttpClient())
-          {
-              var response = await httpClient.GetAsync("http://localhost:3000/v1/asset/byType?type=crypto");
-
-              if (response.IsSuccessStatusCode)
-              {
-
-                  var jsonString = await response.Content.ReadAsStringAsync();
-                  var jsonArray = JsonSerializer.Deserialize<List<CryptoAsset>>(jsonString);
-
-                  return Results.Json(jsonArray);
-
-              }
-              else
-              {
-                  return Results.BadRequest("Failed to retrieve the crypto list.");
-              }
-          }
-      })
-      .WithName("GetAllCryptosInfo")
-      .WithOpenApi();
-
-      app.MapGet("/v1/crypto/{id}", async (int id) =>
-      {
-          using (var httpClient = new HttpClient())
-          {
-              var apiUrl = $"http://localhost:3000/v1/asset/byId?id={id}";
-              var response = await httpClient.GetAsync(apiUrl);
-
-              if (response.IsSuccessStatusCode)
-              {
-                  var jsonString = await response.Content.ReadAsStringAsync();
-                  var crypto = JsonSerializer.Deserialize<CryptoAsset>(jsonString);
-
-                  if (crypto.type != "crypto")
-                    {
-                        return Results.BadRequest("The input id is not a crypto.");
-                    }
-
-                  return Results.Json(crypto);
-              }
-              else
-              {
-                  return Results.BadRequest("Failed to retrieve the crypto.");
-              }
-          }
-      })
-      .WithName("GetCryptoInfoById")
-      .WithOpenApi();
-
+  public static WebApplication MapCryptoPriceController(this WebApplication app)
+  {
 
 
       app.MapGet("/v1/crypto/{id}/{date}", async (int id, string date) =>
@@ -92,9 +41,6 @@ public static class MapEndpoints
       .WithName("GetSingleDayCryptoPrice")
       .WithOpenApi();
 
-
-
-
       app.MapGet("/v1/crypto/{id}/from/{from}/to/{to}", async (int id, string from, string to) =>
       {
           using (var httpClient = new HttpClient())
@@ -120,7 +66,8 @@ public static class MapEndpoints
       .WithName("GetPeriodCryptoPrice")
       .WithOpenApi();
 
-
       return app;
-    }
+
+  }
+
 }
